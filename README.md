@@ -34,21 +34,38 @@ python3 -m http.server 8000
 - Instagram: [@xyzhang2017](https://instagram.com/xyzhang2017)
 - Based in Beijing 北京
 
+## 日常更新流程（记住这一个就够）
+
+1. 照片放进 `photos/`，命名规则：
+   - 封面背景：`cover.jpg`
+   - 项目照片：`{项目名}-{序号}.jpg`，如 `talk-1.jpg`、`talk-2.jpg`、`rain-1.jpg`
+   - 序号必须从 1 连续编号，断号的部分不会显示
+2. **双击 `update.command`**（或终端运行 `./update.command`），它会自动：
+   - 把 `.jpeg` / `.JPG` 统一改名为 `.jpg`
+   - 压缩过大的照片（长边 >2400px 或 >2MB；原件自动备份到 `originals/`，不会上传）
+   - 重新生成 `photos/manifest.json`（网站按它显示每个项目的实际张数）
+   - 提交并推送，1–2 分钟后线上生效
+
+线上地址：**https://littlerain2017.github.io/xiaoyuzhang-photo/**
+仓库：https://github.com/littlerain2017/xiaoyuzhang-photo
+
+## 项目名（网格从左到右）
+
+talk / rain / clutter / p4 / p5 / p6 / p7 / p8 / p9（后六个待定名）
+
 ## 待办 / 后续
 
-- [ ] 用真实作品图替换 `assets/images/` 的占位（现在是 CSS 渐变占位）
-- [ ] 确认「Series」之外要不要加的第 5 个板块（问卷里勾的 Other）
-- [ ] 字体内联：把 Helvetica Neue / Neue Haas 的 woff2 用 `@font-face` data URI 内联，锁死跨设备一致（当前依赖访客系统字体）
-- [ ] 单个作品详情页（点进去看整组照片）
-- [ ] 图片懒加载 + 响应式尺寸（`srcset` / `loading="lazy"`）
-- [ ] 可选：favicon、OG 分享卡、SEO meta
+- [ ] 后六个项目定名（改 index.html 里的 `data-project` 和 title，photos 命名跟着改）
+- [ ] 字体内联（Neue Haas 为付费商用字，暂用系统 Helvetica Neue 栈）
+- [ ] 可选：绑定自己的域名
 
 ## 结构
 
 ```
 xiaoyuzhang-photo/
-├── index.html          # 主页（当前 CSS/JS 内联，落地后可拆分）
-├── assets/
-│   └── images/         # 作品图
+├── index.html          # 整站（HTML/CSS/JS 单文件）
+├── update.command      # 一键更新脚本（双击运行）
+├── photos/             # 网页用照片 + manifest.json（提交上线）
+├── originals/          # 压缩前的原件备份（gitignore，不上传）
 └── README.md
 ```
