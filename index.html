@@ -173,12 +173,60 @@
   .ph.rose    { background-image: radial-gradient(100% 100% at 30% 25%, #f2c9cf, #c98a95 45%, #5c3944 88%); }
   .ph.noir    { background-image: linear-gradient(135deg, #1a1a1c, #3a3a40 50%, #0d0d10); }
 
+  /* ============ PROJECT VIEWER — Cargo-style slideshow ============ */
+  body.locked { overflow: hidden; }
+  .viewer {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--bg); color: var(--ink);
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .viewer.open { opacity: 1; pointer-events: auto; }
+  .v-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem;
+    padding: clamp(1.1rem, 2vw, 1.8rem) var(--pad) 0.6rem;
+  }
+  .v-desc { font-size: clamp(0.92rem, 0.88rem + 0.2vw, 1.08rem); line-height: 1.5; max-width: 78ch; }
+  .v-desc b { font-weight: 600; }
+  .v-desc .muted { color: var(--dim); }
+  .v-close {
+    background: none; border: 0; cursor: pointer; flex-shrink: 0;
+    font-family: var(--sans); font-size: clamp(0.92rem, 0.88rem + 0.2vw, 1.08rem); color: var(--ink);
+    padding: 0 0 3px; position: relative;
+  }
+  .v-close::after { content:""; position:absolute; left:0; bottom:0; height:1.5px; width:100%; background: var(--ink); }
+  .v-stage {
+    position: relative; flex: 1; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(0.8rem, 2vh, 1.6rem) var(--pad);
+  }
+  .v-frame { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  #vPh { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); height: 100%; max-height: 100%; aspect-ratio: 3/4; max-width: 100%; transition: opacity 0.3s ease; }
+  #vImg { position: relative; z-index: 1; display: block; max-width: 100%; max-height: 100%; opacity: 0; transition: opacity 0.45s ease; }
+  #vImg.loaded { opacity: 1; }
+  .v-frame.has-img #vPh { opacity: 0; }
+  .v-zone {
+    position: absolute; top: 0; bottom: 0; width: 50%; z-index: 2;
+    background: none; border: 0; padding: 0;
+  }
+  .v-zone.left { left: 0; cursor: w-resize; }
+  .v-zone.right { right: 0; cursor: e-resize; }
+  .v-foot {
+    display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem;
+    padding: 0.6rem var(--pad) clamp(1rem, 2vw, 1.6rem);
+    font-size: clamp(0.8rem, 0.76rem + 0.2vw, 0.95rem);
+  }
+  .v-foot .muted { color: var(--dim); }
+  #vIndex { font-variant-numeric: tabular-nums; }
+
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .reveal { opacity:1; transform:none; transition:none; }
     .work .ph { transition:none; }
     .cover .cover-bg { animation: none; }
     .scroll-cue { animation: none; }
+    .viewer, #vImg, #vPh { transition: none; }
   }
 </style>
 
@@ -207,15 +255,15 @@
 
 <main id="work">
   <section class="grid">
-    <a class="work reveal" href="#"><div class="ph portrait"></div><div class="title">talk</div></a>
-    <a class="work reveal" href="#"><div class="ph mist"></div><div class="title">rain</div></a>
-    <a class="work reveal" href="#"><div class="ph amber"></div><div class="title">clutter</div></a>
-    <a class="work reveal" href="#"><div class="ph forest"></div><div class="title">Green Distance</div></a>
-    <a class="work reveal" href="#"><div class="ph rose"></div><div class="title">Dusk Rooms</div></a>
-    <a class="work reveal" href="#"><div class="ph portrait"></div><div class="title">Portraits '26</div></a>
-    <a class="work reveal" href="#"><div class="ph sea"></div><div class="title">Between the Tides</div></a>
-    <a class="work reveal" href="#"><div class="ph slate"></div><div class="title">Concrete</div></a>
-    <a class="work reveal" href="#"><div class="ph noir"></div><div class="title">After Hours</div></a>
+    <a class="work reveal" href="#" data-project="talk"><div class="ph portrait"></div><div class="title">talk</div></a>
+    <a class="work reveal" href="#" data-project="rain"><div class="ph mist"></div><div class="title">rain</div></a>
+    <a class="work reveal" href="#" data-project="clutter"><div class="ph amber"></div><div class="title">clutter</div></a>
+    <a class="work reveal" href="#" data-project="p4"><div class="ph forest"></div><div class="title">Green Distance</div></a>
+    <a class="work reveal" href="#" data-project="p5"><div class="ph rose"></div><div class="title">Dusk Rooms</div></a>
+    <a class="work reveal" href="#" data-project="p6"><div class="ph portrait"></div><div class="title">Portraits '26</div></a>
+    <a class="work reveal" href="#" data-project="p7"><div class="ph sea"></div><div class="title">Between the Tides</div></a>
+    <a class="work reveal" href="#" data-project="p8"><div class="ph slate"></div><div class="title">Concrete</div></a>
+    <a class="work reveal" href="#" data-project="p9"><div class="ph noir"></div><div class="title">After Hours</div></a>
   </section>
 
   <section class="about" id="about">
@@ -230,6 +278,25 @@
     <a href="https://instagram.com/xyzhang2017" target="_blank" rel="noopener">Instagram ↗</a>
   </nav>
 </footer>
+
+<div class="viewer" id="viewer" aria-hidden="true" role="dialog" aria-label="Project slideshow">
+  <div class="v-head">
+    <p class="v-desc" id="vDesc"></p>
+    <button class="v-close" id="vClose" type="button">Index</button>
+  </div>
+  <div class="v-stage">
+    <div class="v-frame" id="vFrame">
+      <div class="ph portrait" id="vPh"></div>
+      <img id="vImg" alt="">
+    </div>
+    <button class="v-zone left" id="vPrev" type="button" aria-label="Previous image"></button>
+    <button class="v-zone right" id="vNext" type="button" aria-label="Next image"></button>
+  </div>
+  <div class="v-foot">
+    <span>No. of Images: 08<br><span class="muted">All Rights Reserved © 2026</span></span>
+    <span id="vIndex">01 — 08</span>
+  </div>
+</div>
 
 <script>
   // scroll reveal for work items
@@ -290,13 +357,15 @@
 
   const pad2 = (n) => String(n).padStart(2, '0');
 
+  const vFrame = document.getElementById('vFrame');
   function renderSlide() {
     vPh.className = 'ph ' + SLOT_PH[curIdx % SLOT_PH.length];
     vImg.classList.remove('loaded');
+    vFrame.classList.remove('has-img');
     vImg.alt = curKey + ' ' + pad2(curIdx + 1);
-    vImg.onload = () => vImg.classList.add('loaded');
-    vImg.onerror = () => vImg.classList.remove('loaded');
-    vImg.src = 'assets/images/' + curKey + '-' + (curIdx + 1) + '.jpg';
+    vImg.onload = () => { vImg.classList.add('loaded'); vFrame.classList.add('has-img'); };
+    vImg.onerror = () => { vImg.classList.remove('loaded'); vFrame.classList.remove('has-img'); };
+    vImg.src = 'photos/' + curKey + '-' + (curIdx + 1) + '.jpg';
     vIndex.textContent = pad2(curIdx + 1) + ' — ' + pad2(SLOT_COUNT);
   }
   function openProject(key) {
