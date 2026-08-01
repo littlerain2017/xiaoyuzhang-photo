@@ -13,6 +13,11 @@ for f in photos/*.jpeg photos/*.JPG photos/*.JPEG; do
   new="photos/$(basename "${f%.*}").jpg"
   [ -e "$new" ] || mv "$f" "$new" && echo "  重命名 $(basename "$f") → $(basename "$new")"
 done
+# 旧命名兼容:cover.jpg → cover-1.jpg(封面轮播用 cover-1..N)
+if [ -e photos/cover.jpg ] && [ ! -e photos/cover-1.jpg ]; then
+  mv photos/cover.jpg photos/cover-1.jpg
+  echo "  重命名 cover.jpg → cover-1.jpg"
+fi
 
 echo "— 优化过大的照片(长边>2400px 或 >2MB)—"
 for f in photos/*.jpg; do
@@ -47,7 +52,7 @@ for k, nums in sorted(nums_by_key.items()):
     missing = sorted(set(range(1, max(nums) + 1)) - nums)
     if missing:
         print(f'  ⚠️  {k} 缺号 {missing} — 网站只会显示前 {n} 张,请补齐编号')
-manifest['cover'] = os.path.exists('photos/cover.jpg')
+manifest.setdefault('cover', 0)
 with open('photos/manifest.json', 'w') as fp:
     json.dump(manifest, fp, ensure_ascii=False, indent=1)
 print('  ' + json.dumps(manifest, ensure_ascii=False))

@@ -9,7 +9,7 @@
 <meta property="og:description" content="Photographer based in Beijing. Portraits, series, and the quiet edges of the city.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://littlerain2017.github.io/xiaoyuzhang-photo/">
-<meta property="og:image" content="https://littlerain2017.github.io/xiaoyuzhang-photo/photos/cover.jpg">
+<meta property="og:image" content="https://littlerain2017.github.io/xiaoyuzhang-photo/photos/cover-1.jpg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
 <style>
   :root {
@@ -89,6 +89,7 @@
   .cover-img {
     position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: cover; display: block;
+    transition: opacity 1.6s ease;
   }
   @keyframes kenburns { from { transform: scale(1.02); } to { transform: scale(1.11); } }
   .cover .veil {
@@ -275,7 +276,7 @@
 </header>
 
 <section class="cover" id="cover">
-  <div class="ph portrait cover-bg"><img class="cover-img" src="photos/cover.jpg" alt="" fetchpriority="high" onerror="this.remove()"></div>
+  <div class="ph portrait cover-bg"><img class="cover-img" src="photos/cover-1.jpg" alt="" fetchpriority="high" onerror="this.remove()"></div>
   <div class="veil"></div>
   <div class="cover-cap">
     <h1>xiaoyuzhang</h1>
@@ -391,9 +392,38 @@
     });
   }
 
+  // cover slideshow: cover-1.jpg … cover-N.jpg crossfade every 6s
+  function initCoverSlideshow() {
+    const n = counts && typeof counts.cover === 'number' ? counts.cover : 0;
+    if (n < 2 || reduce) return;
+    const bg = document.querySelector('.cover-bg');
+    const base = document.querySelector('.cover-img');
+    if (!bg || !base) return;
+    const layers = [base];
+    base.style.opacity = '1';
+    for (let i = 2; i <= n; i++) {
+      const im = new Image();
+      im.className = 'cover-img';
+      im.alt = '';
+      im.style.opacity = '0';
+      im.onerror = () => im.remove();
+      im.src = 'photos/cover-' + i + '.jpg';
+      bg.appendChild(im);
+      layers.push(im);
+    }
+    let cur = 0;
+    setInterval(() => {
+      const next = (cur + 1) % layers.length;
+      if (!layers[next].isConnected) { cur = next; return; }
+      layers[next].style.opacity = '1';
+      layers[cur].style.opacity = '0';
+      cur = next;
+    }, 6000);
+  }
+
   fetch('photos/manifest.json')
     .then((r) => (r.ok ? r.json() : null))
-    .then((j) => { if (j) { counts = j; addThumbs(); } })
+    .then((j) => { if (j) { counts = j; addThumbs(); initCoverSlideshow(); } })
     .catch(() => {});
   const projects = {
     talk:    { desc: 'A conversation held in fragments — overheard, half-remembered, reassembled in frames.' },

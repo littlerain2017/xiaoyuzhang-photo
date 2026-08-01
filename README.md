@@ -37,7 +37,7 @@ python3 -m http.server 8000
 ## 日常更新流程（记住这一个就够）
 
 1. 照片放进 `photos/`，命名规则：
-   - 封面背景：`cover.jpg`
+   - 封面轮播：`cover-1.jpg` ~ `cover-6.jpg`（≥2 张时自动每 6 秒淡切轮播，几张都行）
    - 项目照片：`{项目名}-{序号}.jpg`，如 `talk-1.jpg`、`talk-2.jpg`、`rain-1.jpg`
    - 序号必须从 1 连续编号，断号的部分不会显示
 2. **双击 `update.command`**（或终端运行 `./update.command`），它会自动：
