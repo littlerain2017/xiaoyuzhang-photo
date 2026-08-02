@@ -51,7 +51,9 @@ python3 -m http.server 8000
 
 ## 项目名（网格从左到右）
 
-talk / rain / clutter / p4 / p5 / p6 / p7 / p8 / p9（后六个待定名）
+talk / rain / clutter / black&white / p5 / p6 / p7 / p8 / p9（后五个待定名）
+
+> black&white 的照片命名用 `blackwhite-1.jpg`（文件名不能带 `&`）
 
 ## 待办 / 后续
 

@@ -292,7 +292,7 @@
     <a class="work reveal" href="#" data-project="talk"><div class="ph portrait"></div><div class="title">talk</div></a>
     <a class="work reveal" href="#" data-project="rain"><div class="ph mist"></div><div class="title">rain</div></a>
     <a class="work reveal" href="#" data-project="clutter"><div class="ph amber"></div><div class="title">clutter</div></a>
-    <a class="work reveal" href="#" data-project="p4"><div class="ph forest"></div><div class="title">Green Distance</div></a>
+    <a class="work reveal" href="#" data-project="blackwhite"><div class="ph forest"></div><div class="title">black&amp;white</div></a>
     <a class="work reveal" href="#" data-project="p5"><div class="ph rose"></div><div class="title">Dusk Rooms</div></a>
     <a class="work reveal" href="#" data-project="p6"><div class="ph portrait"></div><div class="title">Portraits '26</div></a>
     <a class="work reveal" href="#" data-project="p7"><div class="ph sea"></div><div class="title">Between the Tides</div></a>
@@ -429,7 +429,7 @@
     talk:    { desc: 'A conversation held in fragments — overheard, half-remembered, reassembled in frames.' },
     rain:    { desc: 'The city at first light, seen through weather. Water on glass, on asphalt, on skin.' },
     clutter: { desc: 'Objects that accumulate meaning by sitting still. A study of rooms that remember.' },
-    p4: { desc: 'Untitled series — description to be written.' },
+    blackwhite: { title: 'black&white', desc: 'Light and shadow only — the city stripped to its bones.' },
     p5: { desc: 'Untitled series — description to be written.' },
     p6: { desc: 'Untitled series — description to be written.' },
     p7: { desc: 'Untitled series — description to be written.' },
@@ -484,7 +484,14 @@
   function openProject(key) {
     if (!projects[key]) return;
     curKey = key; curIdx = 0;
-    vDesc.innerHTML = '<b>' + key + '</b> &nbsp; <span class="muted">' + projects[key].desc + '</span>';
+    const p = projects[key];
+    vDesc.textContent = '';
+    const b = document.createElement('b');
+    b.textContent = p.title || key;
+    const span = document.createElement('span');
+    span.className = 'muted';
+    span.textContent = '  ' + p.desc;
+    vDesc.append(b, span);
     renderSlide();
     viewer.classList.add('open');
     viewer.setAttribute('aria-hidden', 'false');
