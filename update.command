@@ -19,7 +19,7 @@ if [ -e photos/cover.jpg ] && [ ! -e photos/cover-1.jpg ]; then
   echo "  重命名 cover.jpg → cover-1.jpg"
 fi
 
-echo "— 优化过大的照片(长边>2400px 或 >2MB)—"
+echo "— 优化过大的照片(普通 2400px/2MB;宽幅 3200px/3MB)—"
 for f in photos/*.jpg; do
   [ -e "$f" ] || continue
   base=$(basename "$f")
@@ -27,9 +27,14 @@ for f in photos/*.jpg; do
   h=$(sips -g pixelHeight "$f" | awk '/pixelHeight/{print $2}')
   size=$(stat -f%z "$f")
   long=$(( w > h ? w : h ))
-  if [ "$long" -gt 2400 ] || [ "$size" -gt 2000000 ]; then
+  # 宽幅作品在网站上通栏满幅展示,需要比网格缩略图更高的分辨率
+  case "$base" in
+    widescreen-*) maxlong=3200; maxsize=3000000 ;;
+    *)            maxlong=2400; maxsize=2000000 ;;
+  esac
+  if [ "$long" -gt "$maxlong" ] || [ "$size" -gt "$maxsize" ]; then
     [ -e "originals/$base" ] || cp "$f" "originals/$base"
-    sips -Z 2400 -s format jpeg -s formatOptions 82 "$f" --out "$f" >/dev/null
+    sips -Z "$maxlong" -s format jpeg -s formatOptions 82 "$f" --out "$f" >/dev/null
     echo "  压缩 $base ($(( size / 1024 / 1024 ))MB → $(( $(stat -f%z "$f") / 1024 ))KB)"
   fi
 done

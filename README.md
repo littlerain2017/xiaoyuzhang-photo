@@ -39,6 +39,7 @@ python3 -m http.server 8000
 1. 照片放进 `photos/`，命名规则：
    - 封面轮播：`cover-1.jpg` ~ `cover-6.jpg`（≥2 张时自动每 6 秒淡切轮播，几张都行）
    - 项目照片：`{项目名}-{序号}.jpg`，如 `talk-1.jpg`、`talk-2.jpg`、`rain-1.jpg`
+   - **宽幅作品：`widescreen-1.jpg`、`widescreen-2.jpg`…** 见下方 Widescreen 板块
    - 序号必须从 1 连续编号，断号的部分不会显示
 2. **双击 `update.command`**（或终端运行 `./update.command`），它会自动：
    - 把 `.jpeg` / `.JPG` 统一改名为 `.jpg`
@@ -48,6 +49,18 @@ python3 -m http.server 8000
 
 线上地址：**https://littlerain2017.github.io/xiaoyuzhang-photo/**
 仓库：https://github.com/littlerain2017/xiaoyuzhang-photo
+
+## Widescreen 板块
+
+三列网格之下有一个独立的宽幅区，专放 2.56:1 一类的超宽画幅。它不进网格，避免被 16:10 的取景框裁掉两侧。
+
+- 命名 `widescreen-1.jpg` 起，连续编号；放进 `photos/` 后跑一次 `update.command` 即可
+- 版面为**通栏连续堆叠**：满幅贴到视口两边，缝隙 2–6px，多张连读像一条胶片
+- 一张都没有时整块自动隐藏，不会留下空标题
+- 点任意一张进幻灯片，从该张开始翻
+- 压缩上限比普通照片高（长边 3200px / 3MB，普通照片是 2400px / 2MB），因为通栏满幅需要更高分辨率
+
+> 注意：本地双击 `index.html` 预览时，浏览器会拦截 `manifest.json` 的读取，Widescreen 板块和网格缩略图都不会出现。要在本地看效果，用 README 上面那条 `python3 -m http.server` 起服务器访问。线上不受影响。
 
 ## 项目名（网格从左到右）
 

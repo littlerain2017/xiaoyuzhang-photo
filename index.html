@@ -205,6 +205,50 @@
   }
   .work:hover .thumb-img { transform: scale(1.03); }
 
+
+  /* ============ WIDESCREEN — 2.56:1 作品，通栏连续堆叠 ============ */
+  .ws { margin-top: clamp(3rem, 8vw, 7rem); }
+  .ws-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    border-top: 1px solid var(--line);
+    padding: 0.8rem 0 1.2rem;
+    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim);
+  }
+  .ws-head .ws-title { color: var(--ink); letter-spacing: 0.16em; }
+  .ws-head .ws-meta { font-variant-numeric: tabular-nums; }
+  /* 通栏：吃掉 main 的左右内边距，贴到视口边缘 */
+  .ws-stack {
+    display: flex; flex-direction: column;
+    gap: clamp(2px, 0.3vw, 6px);
+    margin-inline: calc(-1 * var(--pad));
+  }
+  .wsfig {
+    position: relative; display: block; overflow: hidden;
+    aspect-ratio: 2.56; background: #ededea;
+  }
+  .wsfig img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transition: transform 1.1s cubic-bezier(0.16,1,0.3,1);
+  }
+  .wsfig::before {
+    content:""; position:absolute; inset:0; z-index:1;
+    background: var(--hover-veil); opacity:0; transition: opacity 0.5s ease;
+  }
+  .wsfig .wcap {
+    position: absolute; z-index: 2; left: 0; bottom: 0;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.72rem; letter-spacing: 0.1em; color: var(--veil-ink);
+    font-variant-numeric: tabular-nums;
+    opacity: 0; transition: opacity 0.4s ease;
+  }
+  .wsfig:hover img { transform: scale(1.02); }
+  .wsfig:hover::before { opacity: 1; }
+  .wsfig:hover .wcap { opacity: 1; }
+  @media (hover: none) {
+    .wsfig .wcap { opacity: 1; color: #fff; mix-blend-mode: difference; }
+  }
+
   /* ============ PROJECT VIEWER — Cargo-style slideshow ============ */
   body.locked { overflow: hidden; }
   .viewer {
@@ -235,6 +279,7 @@
   }
   .v-frame { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
   #vPh { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); height: 100%; max-height: 100%; aspect-ratio: 3/4; max-width: 100%; transition: opacity 0.3s ease; }
+  #vPh.wide { height: auto; width: 100%; aspect-ratio: 2.56; }
   #vImg { position: relative; z-index: 1; display: block; max-width: 100%; max-height: 100%; opacity: 0; transition: opacity 0.45s ease; }
   #vImg.loaded { opacity: 1; }
   .v-frame.has-img #vPh { opacity: 0; }
@@ -256,6 +301,7 @@
     html { scroll-behavior: auto; }
     .reveal { opacity:1; transform:none; transition:none; }
     .work .ph { transition:none; }
+    .wsfig img { transition:none; }
     .cover .cover-bg { animation: none; }
     .scroll-cue { animation: none; }
     .viewer, #vImg, #vPh { transition: none; }
@@ -269,6 +315,7 @@
   <nav>
     <a href="#work" class="active">Work</a>
     <a href="#work">Series</a>
+    <a href="#widescreen">Widescreen</a>
     <a href="#about">About</a>
     <a href="#contact">Contact</a>
     <a href="https://instagram.com/xyzhang2017" target="_blank" rel="noopener" class="social" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -293,11 +340,19 @@
     <a class="work reveal" href="#" data-project="rain"><div class="ph mist"></div><div class="title">rain</div></a>
     <a class="work reveal" href="#" data-project="clutter"><div class="ph amber"></div><div class="title">clutter</div></a>
     <a class="work reveal" href="#" data-project="blackwhite"><div class="ph forest"></div><div class="title">black&amp;white</div></a>
-    <a class="work reveal" href="#" data-project="p5"><div class="ph rose"></div><div class="title">Dusk Rooms</div></a>
+    <a class="work reveal" href="#" data-project="thaw"><div class="ph mist"></div><div class="title">Thaw</div></a>
     <a class="work reveal" href="#" data-project="p6"><div class="ph portrait"></div><div class="title">Portraits '26</div></a>
     <a class="work reveal" href="#" data-project="p7"><div class="ph sea"></div><div class="title">Between the Tides</div></a>
     <a class="work reveal" href="#" data-project="p8"><div class="ph slate"></div><div class="title">Concrete</div></a>
     <a class="work reveal" href="#" data-project="p9"><div class="ph noir"></div><div class="title">After Hours</div></a>
+  </section>
+
+  <section class="ws" id="widescreen" hidden>
+    <div class="ws-head">
+      <span class="ws-title">Widescreen</span>
+      <span class="ws-meta" id="wsMeta"></span>
+    </div>
+    <div class="ws-stack" id="wsStack"></div>
   </section>
 
   <section class="about" id="about">
@@ -335,8 +390,9 @@
 
 <script>
   // scroll reveal for work items
+  let io = null;
   if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((es) => {
+    io = new IntersectionObserver((es) => {
       es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
@@ -423,19 +479,49 @@
 
   fetch('photos/manifest.json')
     .then((r) => (r.ok ? r.json() : null))
-    .then((j) => { if (j) { counts = j; addThumbs(); initCoverSlideshow(); } })
+    .then((j) => { if (j) { counts = j; addThumbs(); initCoverSlideshow(); initWidescreen(); } })
     .catch(() => {});
   const projects = {
     talk:    { desc: 'A conversation held in fragments — overheard, half-remembered, reassembled in frames.' },
     rain:    { desc: 'The city at first light, seen through weather. Water on glass, on asphalt, on skin.' },
     clutter: { desc: 'Objects that accumulate meaning by sitting still. A study of rooms that remember.' },
     blackwhite: { title: 'black&white', desc: 'Light and shadow only — the city stripped to its bones.' },
-    p5: { desc: 'Untitled series — description to be written.' },
-    p6: { desc: 'Untitled series — description to be written.' },
-    p7: { desc: 'Untitled series — description to be written.' },
-    p8: { desc: 'Untitled series — description to be written.' },
-    p9: { desc: 'Untitled series — description to be written.' }
+    thaw: { title: 'Thaw', desc: 'A river holding its breath. The dark line down the middle is the part that never froze.' },
+    p6: { title: "Portraits '26", desc: 'Untitled series — description to be written.' },
+    p7: { title: 'Between the Tides', desc: 'What the tide gives up, laid out on ice. Colour at its brightest an hour after the sea.' },
+    p8: { title: 'Concrete', desc: 'Everything at eye level, exactly where the day left it. The desk as a record of hours.' },
+    p9: { title: 'After Hours', desc: 'Untitled series — description to be written.' },
+    widescreen: { title: 'Widescreen', desc: 'Frames at 2.56:1 — the horizon given its full width.' }
   };
+
+
+  // widescreen: 通栏堆叠 widescreen-1.jpg … widescreen-N.jpg
+  function initWidescreen() {
+    const n = counts && typeof counts.widescreen === 'number' ? counts.widescreen : 0;
+    const sec = document.getElementById('widescreen');
+    const stack = document.getElementById('wsStack');
+    if (!sec || !stack) return;
+    if (n < 1) return;                       // 没有宽幅作品时整块不出现
+    for (let i = 1; i <= n; i++) {
+      const a = document.createElement('a');
+      a.className = 'wsfig reveal';
+      a.href = '#';
+      const img = new Image();
+      img.loading = 'lazy';
+      img.alt = 'widescreen ' + pad2(i);
+      img.onerror = () => a.remove();
+      img.src = 'photos/widescreen-' + i + '.jpg';
+      const cap = document.createElement('span');
+      cap.className = 'wcap';
+      cap.textContent = pad2(i);
+      a.append(img, cap);
+      a.addEventListener('click', (e) => { e.preventDefault(); openProject('widescreen', i - 1); });
+      stack.appendChild(a);
+      if (io) io.observe(a); else a.classList.add('in');
+    }
+    document.getElementById('wsMeta').textContent = '2.56 : 1 · ' + pad2(n);
+    sec.hidden = false;
+  }
 
   const viewer = document.getElementById('viewer');
   const vDesc = document.getElementById('vDesc');
@@ -469,6 +555,7 @@
 
     // neutral loading surface when counts are known; gradient cycle as legacy fallback
     vPh.className = counts ? 'ph flat' : 'ph ' + SLOT_PH[curIdx % SLOT_PH.length];
+    if (curKey === 'widescreen') vPh.classList.add('wide');
     vImg.classList.remove('loaded');
     vFrame.classList.remove('has-img');
     vImg.alt = curKey + ' ' + pad2(curIdx + 1);
@@ -481,9 +568,9 @@
     vImg.src = srcFor(curKey, curIdx);
     vIndex.textContent = pad2(curIdx + 1) + ' — ' + pad2(total);
   }
-  function openProject(key) {
+  function openProject(key, startIdx) {
     if (!projects[key]) return;
-    curKey = key; curIdx = 0;
+    curKey = key; curIdx = startIdx || 0;
     const p = projects[key];
     vDesc.textContent = '';
     const b = document.createElement('b');
